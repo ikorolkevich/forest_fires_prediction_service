@@ -69,7 +69,3 @@ class WeatherApi:
         if response.status_code != 200:
             raise ValueError(f'Status code != 200 on query: {query}')
         return response.json()
-
-
-if __name__ == '__main__':
-    WeatherApi.get_weather_data(61.325919, 100.493756)
