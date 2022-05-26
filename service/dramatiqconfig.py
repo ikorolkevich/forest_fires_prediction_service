@@ -5,8 +5,6 @@ import pika
 import dramatiq
 from dramatiq.brokers.rabbitmq import RabbitmqBroker
 from dramatiq.middleware import CurrentMessage
-# from dramatiq.results import Results
-# from dramatiq.results.backends import RedisBackend
 
 
 class RabbitmqParams(NamedTuple):
@@ -27,6 +25,7 @@ class RedisParams(NamedTuple):
 class TasksParams(NamedTuple):
     max_retries: int
     predict_forest_fire_queue: str
+    get_weather_data_queue: str
 
 
 RABBITMQ_PARAMS = RabbitmqParams(
@@ -38,18 +37,13 @@ RABBITMQ_PARAMS = RabbitmqParams(
 )
 
 
-# REDIS_PARAMS = RedisParams(
-#     host=os.environ.get('REDIS_HOST', 'localhost'),
-#     port=int(os.environ.get('REDIS_PORT', 6379)),
-#     db=os.environ.get('REDIS_DB', 0),
-#     password=os.environ.get('REDIS_PASSWORD', 'pass')
-# )
-
-
 TASK_PARAMS = TasksParams(
     max_retries=int(os.environ.get('MAX_RETRIES', 0)),
     predict_forest_fire_queue=os.environ.get(
         'PREDICT_FOREST_FIRE_QUEUE', 'PREDICT_FOREST_FIRE'
+    ),
+    get_weather_data_queue=os.environ.get(
+        'GET_WEATHER_DATA_QUEUE', 'GET_WEATHER_DATA_QUEUE'
     )
 )
 
@@ -64,11 +58,9 @@ rabbitmq_broker = RabbitmqBroker(
 )
 rabbitmq_broker.middleware = rabbitmq_broker.middleware[1:]
 current_message_middleware = CurrentMessage()
-# result_middleware = Results(backend=RedisBackend())
 
 for middleware in [
     current_message_middleware,
-    # result_middleware
 ]:
     rabbitmq_broker.add_middleware(middleware)
 

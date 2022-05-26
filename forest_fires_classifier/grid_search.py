@@ -19,11 +19,9 @@ np.random.seed(0)
 
 def run_train(
         batch_size, learning_rate, func_act,
-        train_file='/home/ikorolkevich/git/forest_fires_prediction_service/'
-                   'forest_fires_classifier/data_processing/train.csv',
-        valid_file='/home/ikorolkevich/git/forest_fires_prediction_service/'
-                   'forest_fires_classifier/data_processing/test.csv',
-        output_dir='grid-logs-linear128batch',
+        train_file='/home/ikorolkevich/git/forest_fires_prediction_service/forest_fires_classifier/data_processing/new/train_l.csv',
+        valid_file='/home/ikorolkevich/git/forest_fires_prediction_service/forest_fires_classifier/data_processing/new/test_l.csv',
+        output_dir='test',
         epochs=50,
         patience=10,
 ):
@@ -33,12 +31,10 @@ def run_train(
         dataset_cls=ForestFiresLinearDataset
     )
 
-    # model = ForestFireClassifier(lr=learning_rate, num_classes=5, func_act=func_act)
+    model = ForestFireClassifier(lr=learning_rate, num_classes=5, func_act=func_act)
     # model = ForestFiresClassifierCNN(lr=learning_rate, num_classes=5, func_act=func_act)
-    model = ForestFireClassifier128Batch(lr=learning_rate, num_classes=5, func_act=func_act)
-    model_name = f'{model.__class__.__name__}_act_' \
-                 f'{model.func_act.__class__.__name__}_lr_' \
-                 f'{learning_rate}_bs_{batch_size}'
+    # model = ForestFireClassifier128Batch(lr=learning_rate, num_classes=5, func_act=func_act)
+    model_name = f'Скорость обучения {learning_rate} Размер партии {batch_size}'
     print(f'Start training {model_name}')
     tb_logger = TensorBoardLogger(
         save_dir=output_dir, name=model_name
@@ -70,10 +66,12 @@ def run_train(
 
 if __name__ == '__main__':
     PARAMETERS = {
-        'learning_rate': [1e-3, 3e-3, 1e-2, 3e-2, 1e-4, 3e-4],
+        # 'learning_rate': [1e-3, 3e-3, 1e-2, 3e-2, 1e-4, 3e-4],
+        'learning_rate': [1e-4],
         'batch_size': [16, 32, 64],
         # 'func_act': [nn.ReLU, nn.GELU, nn.Mish, nn.ELU, nn.LeakyReLU, nn.SELU],
-        'func_act': [nn.ReLU, nn.LeakyReLU, nn.GELU, nn.Mish, nn.ELU, nn.SELU],
+        # 'func_act': [nn.ReLU, nn.LeakyReLU, nn.GELU, nn.Mish, nn.ELU, nn.SELU],
+        'func_act': [nn.ReLU],
     }
     keys, values = zip(*PARAMETERS.items())
     permutations_dicts = [
@@ -81,4 +79,3 @@ if __name__ == '__main__':
     ]
     for params in permutations_dicts:
         run_train(**params)
-

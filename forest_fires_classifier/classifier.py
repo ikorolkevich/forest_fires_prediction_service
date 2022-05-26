@@ -1,5 +1,7 @@
 from typing import Optional
 
+import numpy as np
+import pandas as pd
 import pytorch_lightning as pl
 import torch
 from torch.nn import functional as func
@@ -35,12 +37,31 @@ class BaseForestFireClassifier(pl.LightningModule):
             "monitor": "val_loss"
         }
 
+    @classmethod
+    def to_representation(cls, value: int) -> float:
+        if value == 1:
+            value = 10
+        elif value == 2:
+            value = 35
+        elif value == 3:
+            value = 85
+        elif value == 0:
+            value = 0
+        else:
+            value = 95
+        return value
+
     def predict(self, data):
-        data = torch.from_numpy(data).double()
+        temp = data[0]
+        data = torch.from_numpy(data[None]).float()
         data = data.to(self.device)
         probabilities = self(data)
         res_labels = torch.argmax(probabilities, dim=1)
-        return res_labels
+        res = res_labels.to('cpu').detach().numpy()[0]
+        if (temp < 20 and res > 2) or (temp >= 20 and res == 0):
+            return self.to_representation(1)
+        else:
+            return self.to_representation(res)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -193,3 +214,20 @@ class ForestFiresClassifierCNN(BaseForestFireClassifier):
         x = func.softmax(x, dim=1)
         return x
 
+if __name__ == '__main__':
+    # m = ForestFireClassifier.load_from_checkpoint('/home/ikorolkevich/git/forest_fires_prediction_service/forest_fires_classifier/grid-logs_new/ForestFireClassifier_act_ReLU_lr_0.0001_bs_64/version_0/checkpoints/last.ckpt', hparams_file='/home/ikorolkevich/git/forest_fires_prediction_service/forest_fires_classifier/grid-logs_new/ForestFireClassifier_act_ReLU_lr_0.0001_bs_64/version_0/hparams.yaml')
+    # m = ForestFireClassifier.load_from_checkpoint('/home/ikorolkevich/git/forest_fires_prediction_service/forest_fires_classifier/финал/Скорость обучения 0.0001 Размер партии 64/version_0/checkpoints/model-epoch=34-val_f1score=0.96815.ckpt')
+    m = ForestFireClassifier.load_from_checkpoint('/home/ikorolkevich/git/forest_fires_prediction_service/forest_fires_classifier/test/Скорость обучения 0.0001 Размер партии 32/version_0/checkpoints/model-epoch=19-val_f1score=0.91174.ckpt')
+    m.to('cuda')
+    print(m.device)
+    m.eval()
+    # 30.52,8.28,3.35,1009.0,25.0,16.0,4
+    # data = pd.read_csv('/home/ikorolkevich/git/forest_fires_prediction_service/forest_fires_classifier/data_processing/new/train_l.csv').values
+    # for i in data:
+    #     _x = i[: -1]
+    #     _y = i[-1]
+    #     y = m.predict(_x)
+    #     if y != _y:
+    #         print(f'{y} | {_y}')
+    print(m.predict(np.array([32.0,7.19,1.0,751.5,0.34,34.0])))
+    # make_dot(y.mean(), params=dict(m.named_parameters())).render("attached", format="png")
