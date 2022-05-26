@@ -117,36 +117,3 @@ def prepare(path_to_csv: str) -> pd.DataFrame:
     df = calculate_days_from_last_rain(df)
     df = calculate_kp(df)
     return df
-
-
-if __name__ == '__main__':
-    ds = prepare('/home/ikorolkevich/git/forest_fires_prediction_service/forest_fires_classifier/data_processing/147a76e35896a5f97b90aa1f454f1e96.csv')
-    ds.to_csv('new/prepared_last.csv', index=False)
-    # x = ds[
-    #     [
-    #         'temp', 'dew_point', 'wind_speed',
-    #         'pressure', 'humidity', 'days_from_last_rain'
-    #     ]
-    # ].values
-    # y = ds['labels'].values
-    # x_train, x_test, y_train, y_test = train_test_split(
-    #     x, y, test_size=0.2, stratify=y, shuffle=True
-    # )
-    # y_test = y_test.reshape(-1, 1)
-    # y_train = y_train.reshape(-1, 1)
-    # columns = [
-    #     'temp', 'dew_point', 'wind_speed', 'pressure', 'humidity',
-    #     'days_from_last_rain', 'label'
-    # ]
-    # df_train = pd.DataFrame(
-    #     data=np.concatenate((x_train, y_train), axis=1),
-    #     columns=columns
-    # )
-    # df_test = pd.DataFrame(
-    #     data=np.concatenate((x_test, y_test), axis=1),
-    #     columns=columns
-    # )
-    # df_train['label'] = df_train['label'].apply(lambda x: int(x - 1))
-    # df_test['label'] = df_test['label'].apply(lambda x: int(x - 1))
-    # df_train.to_csv('new/train_l.csv', index=False)
-    # df_test.to_csv('new/test_l.csv', index=False)
